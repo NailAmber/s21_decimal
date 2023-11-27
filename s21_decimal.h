@@ -16,6 +16,9 @@ typedef struct {
   uint16_t scale;
 } work_decimal;
 
+work_decimal decimal_to_work(s21_decimal dec);
+void point_to_normal(work_decimal *dec1_work, work_decimal *dec2_work);
+
 int getoverflow(work_decimal *dec);
 int pointleft(work_decimal *dec);
 int pointright(work_decimal *dec);
@@ -23,5 +26,6 @@ int bankround(double x);
 int normalize(work_decimal *dec);
 
 int s21_is_equal(s21_decimal dec1, s21_decimal dec2);
+int s21_is_less(s21_decimal dec1, s21_decimal dec2);
 
 #endif  // S21_DECIMAL_H_

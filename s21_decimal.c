@@ -92,33 +92,66 @@ int normalize(work_decimal *dec) {
   return error;
 }
 
+work_decimal decimal_to_work(s21_decimal dec) {
+  work_decimal result;
+  result.bits[0] = dec.bits[0] & MAX4BITE;
+  result.bits[1] = dec.bits[1] & MAX4BITE;
+  result.bits[2] = dec.bits[2] & MAX4BITE;
+  result.scale = (dec.bits[3] & SC) >> 16;
+  return result;
+}
+
+void point_to_normal(work_decimal *dec1_work, work_decimal *dec2_work) {
+  if (dec1_work->scale < dec2_work->scale) {
+    while (dec1_work->scale != dec2_work->scale && !pointleft(dec1_work))
+      ;
+  } else if (dec2_work->scale < dec1_work->scale) {
+    while (dec1_work->scale != dec2_work->scale && !pointleft(dec2_work))
+      ;
+  }
+}
+
 int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   int res = 1;
   if ((dec1.bits[3] & MINUS) != (dec2.bits[3] & MINUS)) {
     res = 0;
   } else {
     work_decimal dec1_work, dec2_work;
-    dec1_work.bits[0] = dec1.bits[0] & MAX4BITE;
-    dec1_work.bits[1] = dec1.bits[1] & MAX4BITE;
-    dec1_work.bits[2] = dec1.bits[2] & MAX4BITE;
-    dec1_work.scale = (dec1.bits[3] & SC) >> 16;
-    printf("dec1_work.scale = %d\n", dec1_work.scale);
-
-    dec2_work.bits[0] = dec2.bits[0] & MAX4BITE;
-    dec2_work.bits[1] = dec2.bits[1] & MAX4BITE;
-    dec2_work.bits[2] = dec2.bits[2] & MAX4BITE;
-    dec2_work.scale = (dec2.bits[3] & SC) >> 16;
-    printf("dec2_work.scale = %d\n", dec2_work.scale);
-
-    if (dec1_work.scale < dec2_work.scale) {
-      while (dec1_work.scale != dec2_work.scale && !pointleft(&dec1_work));
-    } else if (dec2_work.scale < dec1_work.scale) {
-      while (dec1_work.scale != dec2_work.scale && !pointleft(&dec2_work));
-    }
+    dec1_work = decimal_to_work(dec1);
+    dec2_work = decimal_to_work(dec2);
+    point_to_normal(&dec1_work, &dec2_work);
     for (int i = 2; i >= 0; i--) {
       if (dec1_work.bits[i] != dec2_work.bits[i]) {
         res = 0;
       }
+    }
+  }
+  return res;
+}
+
+int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
+  int res = 1;
+  if ((dec1.bits[3] & MINUS) < (dec2.bits[3] & MINUS) ||
+      s21_is_equal(dec1, dec2)) {
+    res = 0;
+  } else if ((dec1.bits[3] & MINUS) > (dec2.bits[3] & MINUS)) {
+    res = 1;
+  } else {
+    work_decimal dec1_work, dec2_work;
+    dec1_work = decimal_to_work(dec1);
+    dec2_work = decimal_to_work(dec2);
+    point_to_normal(&dec1_work, &dec2_work);
+    for (int i = 2; i >= 0; i--) {
+      if (dec1_work.bits[i] < dec2_work.bits[i]) {
+        res = 1;
+        i = -1;
+      } else if (dec1_work.bits[i] > dec2_work.bits[i]) {
+        res = 0;
+        i = -1;
+      }
+    }
+    if (dec1.bits[3] & MINUS) {
+      res ? (res = 0) : (res = 1);
     }
   }
   return res;

@@ -30,7 +30,7 @@ int main(void) {
       printf("%lx\n", b.bits[3]);
       printf("%lx\n", b.bits[6]);
       printf("%lx\n", b.bits[2]);
- 
+
 
   work_decimal dec;
   dec.bits[0] = 1294967295;
@@ -61,22 +61,23 @@ int main(void) {
   a.bits[0] = dec.bits[0] & MAX4BITE;
   printf("a 0 = %d\n", a.bits[0]); */
 
+  s21_decimal a, b;
+  a.bits[0] = 0;
+  a.bits[1] = 0x00000000;
+  a.bits[2] = 0x00000000;
+  a.bits[3] = 0x00000000;
 
-    s21_decimal a, b;
-    a.bits[0] = 10000;
-    a.bits[1] = 0x00000000;
-    a.bits[2] = 0x00000000;
-    a.bits[3] = 0x80030000;
+  b.bits[0] = 0;
+  b.bits[1] = 0x00000000;
+  b.bits[2] = 0x00000000;
+  b.bits[3] = 0x80000000;
+  if (s21_is_equal(a, b)) {
+    printf("True1 equal\n");
+  }
 
-    b.bits[0] = 10;
-    b.bits[1] = 0x00000000;
-    b.bits[2] = 0x00000000;
-    b.bits[3] = 0x80000000;
-
-    if (s21_is_equal(a, b)) {
-        printf("True");
-    }
-
+  if (s21_is_less(a, b)) {
+    printf("True2 less\n");
+  }
 
   return 0;
 }
