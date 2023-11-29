@@ -73,6 +73,23 @@ int main(void) {
   b.bits[2] = 0x00000001;
   b.bits[3] = 0x80000000;
 
+  work_decimal work;
+  work.bits[0] = 123456789;
+  work.bits[1] = 0;
+  work.bits[2] = 0;
+  work.bits[3] = 0;
+
+  for (int i = 0; i < 4; i++) {
+    printf("work.bits[%d] = %ld\n", i, work.bits[i]);
+  }
+  pointright(&work);
+  pointleft(&work);
+  pointleft(&work);
+  pointleft(&work);
+  for (int i = 0; i < 4; i++) {
+    printf("work.bits[%d] = %ld\n", i, work.bits[i]);
+  }
+
   printf("\n");
 
   printf("a.bits[0] = %x\n", a.bits[0]);
