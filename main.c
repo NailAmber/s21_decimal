@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 
 #include "s21_decimal.h"
@@ -62,22 +63,42 @@ int main(void) {
   printf("a 0 = %d\n", a.bits[0]); */
 
   s21_decimal a, b;
-  a.bits[0] = 0;
-  a.bits[1] = 0x00000000;
+  a.bits[0] = 0xffffffff;
+  a.bits[1] = 0xffffffff;
   a.bits[2] = 0x00000000;
   a.bits[3] = 0x00000000;
 
-  b.bits[0] = 0;
+  b.bits[0] = 0x00000000;
   b.bits[1] = 0x00000000;
-  b.bits[2] = 0x00000000;
+  b.bits[2] = 0x00000001;
   b.bits[3] = 0x80000000;
-  if (s21_is_equal(a, b)) {
-    printf("True1 equal\n");
-  }
 
-  if (s21_is_less(a, b)) {
-    printf("True2 less\n");
-  }
+  printf("\n");
+
+  printf("a.bits[0] = %x\n", a.bits[0]);
+  printf("a.bits[1] = %x\n", a.bits[1]);
+  printf("a.bits[2] = %x\n", a.bits[2]);
+  printf("a.bits[3] = %x\n\n", a.bits[3]);
+
+  printf("b.bits[0] = %x\n", b.bits[0]);
+  printf("b.bits[1] = %x\n", b.bits[1]);
+  printf("b.bits[2] = %x\n", b.bits[2]);
+  printf("b.bits[3] = %x\n\n", b.bits[3]);
+
+  s21_decimal c;
+  printf("add = %d\n", s21_add(a, b, &c));
+
+  printf("c.bits[0] = %x\n", c.bits[0]);
+  printf("c.bits[1] = %x\n", c.bits[1]);
+  printf("c.bits[2] = %x\n", c.bits[2]);
+  printf("c.bits[3] = %x\n\n", c.bits[3]);
+
+  printf("is a < b : %d\n", s21_is_less(a, b));
+  printf("is a <= b: %d\n", s21_is_less_or_equal(a, b));
+  printf("is a > b : %d\n", s21_is_greater(a, b));
+  printf("is a >= b: %d\n", s21_is_greater_or_equal(a, b));
+  printf("is a == b: %d\n", s21_is_equal(a, b));
+  printf("is a != b: %d\n", s21_is_not_equal(a, b));
 
   return 0;
 }
