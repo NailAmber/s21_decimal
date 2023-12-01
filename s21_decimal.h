@@ -27,6 +27,7 @@ int bankround(double x);
 int normalize(work_decimal *dec);
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
+int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
 int s21_is_less(s21_decimal dec1, s21_decimal dec2);
 int s21_is_less_or_equal(s21_decimal dec1, s21_decimal dec2);
