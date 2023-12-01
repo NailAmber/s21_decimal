@@ -299,3 +299,50 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
   return res;
 }
+
+int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+  int res = 0;
+  work_decimal dec1_work = decimal_to_work(value_1),
+               dec2_work = decimal_to_work(value_2);
+  work_decimal temp_dec = {{0, 0, 0, 0, 0, 0, 0}, 0};
+  temp_dec.bits[0] = dec1_work.bits[0] * dec2_work.bits[0];
+
+  temp_dec.bits[1] =
+      dec1_work.bits[1] * dec2_work.bits[0] + dec1_work.bits[0] * dec2_work.bits[1];
+
+  temp_dec.bits[2] = dec1_work.bits[2] * dec2_work.bits[0] +
+                     dec1_work.bits[1] * dec2_work.bits[1] +
+                     dec1_work.bits[0] * dec2_work.bits[2];
+
+  temp_dec.bits[3] =
+      dec1_work.bits[1] * dec2_work.bits[2] + dec1_work.bits[2] * dec2_work.bits[1];
+
+  temp_dec.bits[4] = dec1_work.bits[2] * dec2_work.bits[2];
+  printf("temp_dec.bits[0] = %lx\n", temp_dec.bits[0]);
+  printf("temp_dec.bits[1] = %lx\n", temp_dec.bits[1]);
+  printf("temp_dec.bits[2] = %lx\n", temp_dec.bits[2]);
+  printf("temp_dec.bits[3] = %lx\n", temp_dec.bits[3]);
+  printf("temp_dec.bits[4] = %lx\n", temp_dec.bits[4]);
+
+  getoverflow(&temp_dec);
+  printf("temp_dec.bits[0] = %lx\n", temp_dec.bits[0]);
+  printf("temp_dec.bits[1] = %lx\n", temp_dec.bits[1]);
+  printf("temp_dec.bits[2] = %lx\n", temp_dec.bits[2]);
+  printf("temp_dec.bits[3] = %lx\n", temp_dec.bits[3]);
+  printf("temp_dec.bits[4] = %lx\n", temp_dec.bits[4]);
+  if (normalize(&temp_dec)) {
+    if ((value_1.bits[3] & MINUS) != (value_2.bits[3] & MINUS)) {
+      res = 2;
+    } else {
+      res = 1;
+    }
+  } else {
+    *result = work_to_decimal(temp_dec);
+    if ((value_1.bits[3] & MINUS) != (value_2.bits[3] & MINUS)) {
+      result->bits[3] |= MINUS;
+    }
+    result->bits[3] |= (value_1.bits[3] & SC) + (value_2.bits[3] & SC);
+  }
+
+  return res;
+}

@@ -63,15 +63,15 @@ int main(void) {
   printf("a 0 = %d\n", a.bits[0]); */
 
   s21_decimal a, b;
-  a.bits[0] = 335;
-  a.bits[1] = 0x00000000;
+  a.bits[0] = 0xf0000000;
+  a.bits[1] = 0xf0000000;
   a.bits[2] = 0x00000000;
-  a.bits[3] = 0x80000000;
+  a.bits[3] = 0x00050000;
 
-  b.bits[0] = 6;
+  b.bits[0] = 10;
   b.bits[1] = 0x00000000;
   b.bits[2] = 0x00000000;
-  b.bits[3] = 0x80010000;
+  b.bits[3] = 0x00040000;
 
   printf("a.bits[0] = %x\n", a.bits[0]);
   printf("a.bits[1] = %x\n", a.bits[1]);
@@ -84,10 +84,10 @@ int main(void) {
   printf("b.bits[3] = %x\n\n", b.bits[3]);
 
   s21_decimal c;
-  printf("add = %d\n", s21_sub(a, b, &c));
-  printf("c.bits[0] = %d\n", c.bits[0]);
-  printf("c.bits[1] = %d\n", c.bits[1]);
-  printf("c.bits[2] = %d\n", c.bits[2]);
+  printf("function = %x\n", s21_mul(a, b, &c));
+  printf("c.bits[0] = %x\n", c.bits[0]);
+  printf("c.bits[1] = %x\n", c.bits[1]);
+  printf("c.bits[2] = %x\n", c.bits[2]);
   printf("c.bits[3] = %x\n\n", c.bits[3]);
 
   printf("is a < b : %d\n", s21_is_less(a, b));
