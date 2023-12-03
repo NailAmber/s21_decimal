@@ -118,6 +118,18 @@ void point_to_normal(work_decimal *dec1_work, work_decimal *dec2_work) {
       ;
   }
 }
+
+int work_is_equal(work_decimal dec1_work, work_decimal dec2_work) {
+  int res = 1;
+  // point_to_normal(&dec1_work, &dec2_work);
+  for (int i = 6; i >= 0; i--) {
+    if (dec1_work.bits[i] != dec2_work.bits[i]) {
+      res = 0;
+    }
+  }
+  return res;
+}
+
 int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   int res = 1;
   if ((dec1.bits[3] & MINUS) != (dec2.bits[3] & MINUS) &&
@@ -137,6 +149,22 @@ int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   }
   return res;
 }
+
+int work_is_less(work_decimal dec1_work, work_decimal dec2_work) {
+  int res = 0;
+  // point_to_normal(&dec1_work, &dec2_work);
+  for (int i = 6; i >= 0; i--) {
+    if (dec1_work.bits[i] < dec2_work.bits[i]) {
+      res = 1;
+      i = -1;
+    } else if (dec1_work.bits[i] > dec2_work.bits[i]) {
+      res = 0;
+      i = -1;
+    }
+  }
+  return res;
+}
+
 int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
   int res = 1;
   if ((dec1.bits[3] & MINUS) < (dec2.bits[3] & MINUS) ||
@@ -197,15 +225,22 @@ int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
   return res;
 }
 
+int work_add(work_decimal dec1_work, work_decimal dec2_work,
+             work_decimal *temp_result) {
+  int res = 0;
+  point_to_normal(&dec1_work, &dec2_work);
+  for (int i = 0; i < 7; i++) {
+    temp_result->bits[i] += dec1_work.bits[i] + dec2_work.bits[i];
+    getoverflow(temp_result);
+  }
+  return res;
+}
+
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int res = 0;
-  result->bits[0] = 0;
-  result->bits[1] = 0;
-  result->bits[2] = 0;
-  result->bits[3] = 0;
   work_decimal dec1_work = decimal_to_work(value_1),
                dec2_work = decimal_to_work(value_2);
-  work_decimal temp_result = decimal_to_work(*result);
+  work_decimal temp_result = {{0, 0, 0, 0, 0, 0, 0}, 0};
   point_to_normal(&dec1_work, &dec2_work);
   if ((value_1.bits[3] & MINUS) == (value_2.bits[3] & MINUS)) {
     for (int i = 0; i < 3; i++) {
@@ -249,15 +284,25 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   return res;
 }
 
+int work_sub(work_decimal value_1, work_decimal value_2, work_decimal *result) {
+  int res = 0;
+  work_decimal temp_result = {{0, 0, 0, 0, 0, 0, 0}, 0};
+  // point_to_normal(&value_1, &value_2);
+
+  for (int i = 0; i < 7; i++) {
+    temp_result.bits[i] += value_1.bits[i] + (~value_2.bits[i] + 1);
+    getoverflow(&temp_result);
+  }
+  *result = temp_result;
+  //result->scale = value_1.scale;
+  return res;
+}
+
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int res = 0;
-  result->bits[0] = 0;
-  result->bits[1] = 0;
-  result->bits[2] = 0;
-  result->bits[3] = 0;
   work_decimal dec1_work = decimal_to_work(value_1),
                dec2_work = decimal_to_work(value_2);
-  work_decimal temp_result = decimal_to_work(*result);
+  work_decimal temp_result = {{0, 0, 0, 0, 0, 0, 0}, 0};
   point_to_normal(&dec1_work, &dec2_work);
   if ((value_1.bits[3] & MINUS) == (value_2.bits[3] & MINUS)) {
     int first_minus = (value_1.bits[3] & MINUS);
@@ -300,36 +345,37 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   return res;
 }
 
+int work_mul(work_decimal dec1_work, work_decimal dec2_work,
+             work_decimal *temp_dec) {
+  int res = 0;
+  temp_dec->bits[0] = dec1_work.bits[0] * dec2_work.bits[0];
+  temp_dec->bits[1] = dec1_work.bits[1] * dec2_work.bits[0] +
+                      dec1_work.bits[0] * dec2_work.bits[1];
+  temp_dec->bits[2] = dec1_work.bits[2] * dec2_work.bits[0] +
+                      dec1_work.bits[1] * dec2_work.bits[1] +
+                      dec1_work.bits[0] * dec2_work.bits[2];
+  temp_dec->bits[3] = dec1_work.bits[1] * dec2_work.bits[2] +
+                      dec1_work.bits[2] * dec2_work.bits[1];
+  temp_dec->bits[4] = dec1_work.bits[2] * dec2_work.bits[2];
+  getoverflow(temp_dec);
+  return res;
+}
+
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int res = 0;
   work_decimal dec1_work = decimal_to_work(value_1),
                dec2_work = decimal_to_work(value_2);
   work_decimal temp_dec = {{0, 0, 0, 0, 0, 0, 0}, 0};
   temp_dec.bits[0] = dec1_work.bits[0] * dec2_work.bits[0];
-
-  temp_dec.bits[1] =
-      dec1_work.bits[1] * dec2_work.bits[0] + dec1_work.bits[0] * dec2_work.bits[1];
-
+  temp_dec.bits[1] = dec1_work.bits[1] * dec2_work.bits[0] +
+                     dec1_work.bits[0] * dec2_work.bits[1];
   temp_dec.bits[2] = dec1_work.bits[2] * dec2_work.bits[0] +
                      dec1_work.bits[1] * dec2_work.bits[1] +
                      dec1_work.bits[0] * dec2_work.bits[2];
-
-  temp_dec.bits[3] =
-      dec1_work.bits[1] * dec2_work.bits[2] + dec1_work.bits[2] * dec2_work.bits[1];
-
+  temp_dec.bits[3] = dec1_work.bits[1] * dec2_work.bits[2] +
+                     dec1_work.bits[2] * dec2_work.bits[1];
   temp_dec.bits[4] = dec1_work.bits[2] * dec2_work.bits[2];
-  printf("temp_dec.bits[0] = %lx\n", temp_dec.bits[0]);
-  printf("temp_dec.bits[1] = %lx\n", temp_dec.bits[1]);
-  printf("temp_dec.bits[2] = %lx\n", temp_dec.bits[2]);
-  printf("temp_dec.bits[3] = %lx\n", temp_dec.bits[3]);
-  printf("temp_dec.bits[4] = %lx\n", temp_dec.bits[4]);
-
   getoverflow(&temp_dec);
-  printf("temp_dec.bits[0] = %lx\n", temp_dec.bits[0]);
-  printf("temp_dec.bits[1] = %lx\n", temp_dec.bits[1]);
-  printf("temp_dec.bits[2] = %lx\n", temp_dec.bits[2]);
-  printf("temp_dec.bits[3] = %lx\n", temp_dec.bits[3]);
-  printf("temp_dec.bits[4] = %lx\n", temp_dec.bits[4]);
   if (normalize(&temp_dec)) {
     if ((value_1.bits[3] & MINUS) != (value_2.bits[3] & MINUS)) {
       res = 2;
@@ -343,6 +389,91 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     result->bits[3] |= (value_1.bits[3] & SC) + (value_2.bits[3] & SC);
   }
+  return res;
+}
 
+void bit_left(work_decimal *dec1_work, int shift) {
+  int max = shift / 32;
+  for (int i = 0; i < max; i++) {
+    for (int j = 0; j < 7; j++) {
+      dec1_work->bits[j] <<= 32;
+    }
+    getoverflow(dec1_work);
+  }
+  for (int i = 0; i < shift % 32; i++) {
+    for (int j = 0; j < 7; j++) {
+      dec1_work->bits[j] <<= 1;
+    }
+  }
+  getoverflow(dec1_work);
+}
+
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+  int res = 0;
+  if (s21_is_equal(value_2, (s21_decimal){{0, 0, 0, 0}})) {
+    res = 3;
+  } else {
+    int sign = 0;
+    if ((value_1.bits[3] & MINUS) != (value_2.bits[3] & MINUS)) {
+      sign = 1;
+    }
+
+    work_decimal dec1_work = decimal_to_work(value_1),
+                 dec2_work = decimal_to_work(value_2),
+                 dec3_work = {{0, 0, 0, 0, 0, 0, 0}, 0};
+    point_to_normal(&dec1_work, &dec2_work);
+    int scale = dec1_work.scale - dec2_work.scale;
+    work_decimal temp_dec = dec2_work;
+    for (int i = 96; i >= 0; i--) {
+      temp_dec = dec2_work;
+      bit_left(&temp_dec, i);
+      if (work_is_less(temp_dec, dec1_work) && i == 96) {
+        if (!sign) {
+          res = 1;
+        } else {
+          res = 2;
+        }
+        i = -1;
+      }
+      if (work_is_less(temp_dec, dec1_work) ||
+          work_is_equal(dec1_work, temp_dec)) {
+        dec3_work.bits[i / 32] |= 1 << (i % 32);
+        work_sub(dec1_work, temp_dec, &dec1_work);
+      }
+    }
+    while (
+        scale < 6 && !res &&
+        !work_is_equal(dec1_work, (work_decimal){{0, 0, 0, 0, 0, 0, 0}, 0})) {
+      pointleft(&dec1_work);
+      pointleft(&dec3_work);
+      scale++;
+      for (int i = 3; i >= 0; i--) {
+        temp_dec = dec2_work;
+        bit_left(&temp_dec, i);
+        printf("dec1_work[0] = %ld\n", dec1_work.bits[0]);
+        printf("temp_dec[0] = %ld\n", temp_dec.bits[0]);
+        if (work_is_less(temp_dec, dec1_work) ||
+            work_is_equal(dec1_work, temp_dec)) {
+          dec3_work.bits[0] |= 1 << i; // не правильно считает дробные части
+          work_sub(dec1_work, temp_dec, &dec1_work);
+        }
+      }
+    }
+    if (normalize(&dec3_work)) {
+      if (!sign) {
+        res = 1;
+      } else {
+        res = 2;
+      }
+    } else {
+      *result = work_to_decimal(dec3_work);
+      if (sign) {
+        result->bits[3] |= MINUS;
+      } else {
+        result->bits[3] &= ~MINUS;
+      }
+      result->bits[3] |= (scale << 16) & SC;
+    }
+  }
   return res;
 }
