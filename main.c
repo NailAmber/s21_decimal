@@ -85,9 +85,9 @@ int main(void) {
 
   s21_decimal c;
   printf("function = %d\n", s21_div(a, b, &c));
-  printf("c.bits[0] = %d\n", c.bits[0]);
-  printf("c.bits[1] = %d\n", c.bits[1]);
-  printf("c.bits[2] = %d\n", c.bits[2]);
+  printf("c.bits[0] = %x\n", c.bits[0]);
+  printf("c.bits[1] = %x\n", c.bits[1]);
+  printf("c.bits[2] = %x\n", c.bits[2]);
   printf("c.bits[3] = %x\n\n", c.bits[3]);
 
   printf("is a < b : %d\n", s21_is_less(a, b));
