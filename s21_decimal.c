@@ -499,3 +499,32 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
   return res;
 }
+
+int s21_from_int_to_decimal(int src, s21_decimal *dst) {
+  int res = 0;
+  s21_decimal temp_dec = {{0, 0, 0, 0}};
+temp_dec.bits[3] = (src < 0) ? MINUS : 0;
+    temp_dec.bits[0] = src & ~MINUS;
+    *dst = temp_dec;
+    return res;
+}
+
+int s21_from_decimal_to_int(s21_decimal src, int *dst) {
+  int res = 0;
+  work_decimal dec_work = decimal_to_work(src);
+  for (int i = 0; i < (src.bits[3] & SC); i++) {
+    pointright(&dec_work);
+
+  }
+  for (int i = 6; i > 0; i--) {
+    if (dec_work.bits[i] != 0) {
+      res = 1;
+      i = 0;
+    }
+  }
+  if (!res && !(dec_work.bits[0] & MINUS)) {
+    *dst = dec_work.bits[0];
+    *dst |= (dec_work.bits[0] & MINUS) << 31;
+  }
+  return res;
+}
