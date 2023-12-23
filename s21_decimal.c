@@ -408,9 +408,11 @@ void bit_left(work_decimal *dec1_work, int shift) {
   getoverflow(dec1_work);
 }
 
-void div_upper_loop(work_decimal *temp_dec, work_decimal *dec2_work,
-                    work_decimal *dec1_work, int sign, int *res,
-                    work_decimal *dec3_work) {
+void div_upper_loop(
+    work_decimal *temp_dec,
+    const work_decimal *dec2_work,  // добавил тут const в параметр, если не
+                                    // работает, можно попробовать удалить это
+    work_decimal *dec1_work, int sign, int *res, work_decimal *dec3_work) {
   for (int i = 96; i >= 0; i--) {
     *temp_dec = *dec2_work;
     bit_left(temp_dec, i);
@@ -422,17 +424,22 @@ void div_upper_loop(work_decimal *temp_dec, work_decimal *dec2_work,
       }
       i = -1;
     }
-    if (work_is_less(*temp_dec, *dec1_work) ||
-        work_is_equal(*dec1_work, *temp_dec)) {
+    if ((work_is_less(*temp_dec, *dec1_work) ||
+         work_is_equal(*dec1_work, *temp_dec)) &&
+        i >= 0) {  // добавил условие && i >=0, если не будет работать, имеет
+                   // смысл пересмотреть решение
       dec3_work->bits[i / 32] |= 1 << (i % 32);
       work_sub(*dec1_work, *temp_dec, dec1_work);
     }
   }
 }
 
-void div_down_loop(work_decimal *temp_dec, work_decimal *dec2_work,
-                   work_decimal *dec1_work, work_decimal *dec3_work, int *scale,
-                   int *temp_div, int *is_it_first_loop) {
+void div_down_loop(
+    work_decimal *temp_dec,
+    const work_decimal *dec2_work,  // добавил тут const в параметр, если не
+                                    // работает, можно попробовать удалить это
+    work_decimal *dec1_work, work_decimal *dec3_work, int *scale, int *temp_div,
+    int *is_it_first_loop) {
   pointleft(dec1_work);
   pointleft(dec3_work);
   *scale = (*scale) + 1;
@@ -503,10 +510,10 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
   int res = 0;
   s21_decimal temp_dec = {{0, 0, 0, 0}};
-temp_dec.bits[3] = (src < 0) ? MINUS : 0;
-    temp_dec.bits[0] = src & ~MINUS;
-    *dst = temp_dec;
-    return res;
+  temp_dec.bits[3] = (src < 0) ? MINUS : 0;
+  temp_dec.bits[0] = src & ~MINUS;
+  *dst = temp_dec;
+  return res;
 }
 
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
@@ -514,7 +521,6 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   work_decimal dec_work = decimal_to_work(src);
   for (int i = 0; i < (src.bits[3] & SC); i++) {
     pointright(&dec_work);
-
   }
   for (int i = 6; i > 0; i--) {
     if (dec_work.bits[i] != 0) {
@@ -525,6 +531,8 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   if (!res && !(dec_work.bits[0] & MINUS)) {
     *dst = dec_work.bits[0];
     *dst |= (dec_work.bits[0] & MINUS) << 31;
+    printf("%x\n", src.bits[3] & MINUS);
+    *dst |= (src.bits[3] & MINUS);
   }
   return res;
 }

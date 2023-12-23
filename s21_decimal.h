@@ -37,10 +37,10 @@ int work_sub(work_decimal value_1, work_decimal value_2, work_decimal *result);
 int work_mul(work_decimal dec1_work, work_decimal dec2_work,
              work_decimal *temp_dec);
 void bit_left(work_decimal *dec1_work, int shift);
-void div_upper_loop(work_decimal *temp_dec, work_decimal *dec2_work,
+void div_upper_loop(work_decimal *temp_dec, const work_decimal *dec2_work,
                     work_decimal *dec1_work, int sign, int *res,
                     work_decimal *dec3_work);
-void div_down_loop(work_decimal *temp_dec, work_decimal *dec2_work,
+void div_down_loop(work_decimal *temp_dec, const work_decimal *dec2_work,
                    work_decimal *dec1_work, work_decimal *dec3_work, int *scale,
                    int *temp_div, int *is_it_first_loop);
 

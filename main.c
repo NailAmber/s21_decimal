@@ -73,7 +73,35 @@ int main(void) {
   b.bits[2] = 0x00000000;
   b.bits[3] = 0x00000000;
 
-  s21_from_int_to_decimal(100, &a);
+  int int_a = INT_MAX;
+  int int_b = INT_MIN;
+
+  printf("int_a = %d\n", int_a);
+  printf("int_b = %x\n\n", int_b);
+
+  s21_from_int_to_decimal(int_a, &a);
+  s21_from_int_to_decimal(int_b, &b);
+
+  printf("a.bits[0] = %d\n", a.bits[0]);
+  printf("a.bits[1] = %x\n", a.bits[1]);
+  printf("a.bits[2] = %x\n", a.bits[2]);
+  printf("a.bits[3] = %x\n\n", a.bits[3]);
+
+  printf("b.bits[0] = %x\n", b.bits[0]);
+  printf("b.bits[1] = %x\n", b.bits[1]);
+  printf("b.bits[2] = %x\n", b.bits[2]);
+  printf("b.bits[3] = %x\n\n", b.bits[3]);
+
+  s21_from_decimal_to_int(a, &int_a);
+  s21_from_decimal_to_int(b, &int_b);
+
+  printf("int_a [x]= %x\n", int_a);
+  printf("int_b [x]= %x\n\n", int_b);
+
+  printf("int_a [d]= %d\n", int_a);
+  printf("int_b [d]= %d\n\n", int_b);
+
+  /*s21_from_int_to_decimal(100, &a);
   s21_from_int_to_decimal(150, &b);
 
    printf("a.bits[0] = %x\n", a.bits[0]);
@@ -85,7 +113,7 @@ int main(void) {
   printf("b.bits[1] = %x\n", b.bits[1]);
   printf("b.bits[2] = %x\n", b.bits[2]);
   printf("b.bits[3] = %x\n\n", b.bits[3]);
-  
+
   s21_decimal c;
   printf("function = %d\n", s21_div(a, b, &c));
   int result;
@@ -105,6 +133,6 @@ int main(void) {
   printf("is a >= b: %d\n", s21_is_greater_or_equal(a, b));
   printf("is a == b: %d\n", s21_is_equal(a, b));
   printf("is a != b: %d\n", s21_is_not_equal(a, b));
-
+*/
   return 0;
 }
