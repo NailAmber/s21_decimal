@@ -519,7 +519,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   int res = 0;
   work_decimal dec_work = decimal_to_work(src);
-  for (int i = 0; i < (src.bits[3] & SC); i++) {
+  for (int i = 0; i < ((src.bits[3] & SC) >> 16); i++) {
     pointright(&dec_work);
   }
   for (int i = 6; i > 0; i--) {
@@ -531,7 +531,6 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   if (!res && !(dec_work.bits[0] & MINUS)) {
     *dst = dec_work.bits[0];
     *dst |= (dec_work.bits[0] & MINUS) << 31;
-    printf("%x\n", src.bits[3] & MINUS);
     *dst |= (src.bits[3] & MINUS);
   }
   return res;
