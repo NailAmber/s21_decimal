@@ -46,7 +46,7 @@ Note on the numbers that do not fit into the mantissa:
 
     When getting numbers that do not fit into the mantissa during arithmetic operations, use bank rounding (for example, 79,228,162,514,264,337,593,543,950,335 - 0.6 = 79,228,162,514,264,337,593,543,950,334)
 
-Comparison Operators:
+# Comparison Operators:
 
 |       Operator name      | Operators |                        Function                       |
 |:------------------------:|:---------:|:-----------------------------------------------------:|
@@ -63,7 +63,7 @@ Return value:
     1 - TRUE
 
 
-Convertors and parsers:
+# Convertors and parsers:
 
 | Convertor/parser |                          Function                          |                                  Function                                  |
 |:----------------:|:----------------------------------------------------------:|:--------------------------------------------------------------------------:|
@@ -87,7 +87,7 @@ Note on the conversion from decimal type to int:
 
     If there is a fractional part in a decimal number, it should be discarded (for example, 0.9 is converted to 0)
 
-Another functions:
+# Another functions:
 |                                                      Description                                                      |                         Function                         |
 |:---------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------:|
 | Rounds a specified Decimal number to the closest integer toward negative infinity.                                    | int s21_floor(s21_decimal value, s21_decimal *result)    |
