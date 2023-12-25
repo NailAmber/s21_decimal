@@ -81,9 +81,9 @@ int main(void) {
   printf("a.bits[2] = %x\n", a.bits[2]);
   printf("a.bits[3] = %x\n\n", a.bits[3]);
 
-  //int int_a;
-  //s21_from_decimal_to_int(a, &int_a);
-  //printf("int_a = %d\n", int_a);
+  // int int_a;
+  // s21_from_decimal_to_int(a, &int_a);
+  // printf("int_a = %d\n", int_a);
 
   /*
   int int_a = INT_MAX;

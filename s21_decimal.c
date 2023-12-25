@@ -243,22 +243,27 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                dec2_work = decimal_to_work(value_2);
   work_decimal temp_result = {{0, 0, 0, 0, 0, 0, 0}, 0};
   point_to_normal(&dec1_work, &dec2_work);
+  /*
   printf("dec1_work [0] = %lx\n", dec1_work.bits[0]);
   printf("dec1_work [1] = %lx\n", dec1_work.bits[1]);
   printf("dec1_work [2] = %lx\n", dec1_work.bits[2]);
   printf("dec1_work [3] = %lx\n", dec1_work.bits[3]);
   printf("dec1_work scale = %d\n\n", dec1_work.scale);
-  if ((value_1.bits[3] & MINUS) == (value_2.bits[3] & MINUS)) { // числа одинаковые по знакам
+  */
+  if ((value_1.bits[3] & MINUS) ==
+      (value_2.bits[3] & MINUS)) {  // числа одинаковые по знакам
     for (int i = 0; i < 6; i++) {
       temp_result.bits[i] += dec1_work.bits[i] + dec2_work.bits[i];
       getoverflow(&temp_result);
     }
     temp_result.scale = dec1_work.scale;
+    /*
     printf("temp_result pre [0] = %lx\n", temp_result.bits[0]);
   printf("temp_result pre [1] = %lx\n", temp_result.bits[1]);
   printf("temp_result pre [2] = %lx\n", temp_result.bits[2]);
   printf("temp_result pre [3] = %lx\n", temp_result.bits[3]);
   printf("temp_result pre scale = %d\n\n", temp_result.scale);
+  */
     if (normalize(&temp_result)) {
       if (value_1.bits[3] & MINUS) {
         res = 2;
@@ -266,18 +271,20 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         res = 1;
       }
     } else {
+      /*
       printf("temp_result [0] = %lx\n", temp_result.bits[0]);
   printf("temp_result [1] = %lx\n", temp_result.bits[1]);
   printf("temp_result [2] = %lx\n", temp_result.bits[2]);
   printf("temp_result [3] = %lx\n", temp_result.bits[3]);
   printf("temp_result scale = %d\n\n", temp_result.scale);
+  */
       *result = work_to_decimal(temp_result);
       if (value_1.bits[3] & MINUS) {
         result->bits[3] |= MINUS;
       }
       result->bits[3] |= (temp_result.scale << 16) & SC;
     }
-  } else { // блок выполняется если числа разные по знакам
+  } else {  // блок выполняется если числа разные по знакам
     int first_minus = (value_1.bits[3] & MINUS);
     int second_minus = (value_2.bits[3] & MINUS);
     value_1.bits[3] &= ~MINUS;
@@ -554,7 +561,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   return res;
 }
 
-int s21_from_decimal_to_float(s21_decimal src, float *dst){
+int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   double temp_result = 0;
   int offset = 0;
   for (int i = 0; i < 96; i++) {
@@ -577,7 +584,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst){
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-  if (src != src || (src == 1. / 0.) || (src == 1. / -0.)) return 1;  
+  if (src != src || (src == 1. / 0.) || (src == 1. / -0.)) return 1;
   s21_decimal temp_dec = {{0, 0, 0, 0}};
   *dst = temp_dec;
   return 0;
