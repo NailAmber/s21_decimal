@@ -44,7 +44,7 @@ The functions return the error code:
 
 Note on the numbers that do not fit into the mantissa:
 
-    When getting numbers that do not fit into the mantissa during arithmetic operations, use bank rounding (for example, 79,228,162,514,264,337,593,543,950,335 - 0.6 = 79,228,162,514,264,337,593,543,950,334)
+When getting numbers that do not fit into the mantissa during arithmetic operations, use bank rounding (for example, 79,228,162,514,264,337,593,543,950,335 - 0.6 = 79,228,162,514,264,337,593,543,950,334).
 
 # Comparison Operators:
 
@@ -65,12 +65,12 @@ Return value:
 
 # Convertors and parsers:
 
-| Convertor/parser |                          Function                          |                                  Function                                  |
-|:----------------:|:----------------------------------------------------------:|:--------------------------------------------------------------------------:|
-| From int         | int s21_from_int_to_decimal(int src, s21_decimal *dst)     | int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) |
-| From float       | int s21_from_float_to_decimal(float src, s21_decimal *dst) | int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) |
-| To int           | int s21_from_decimal_to_int(s21_decimal src, int *dst)     | int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) |
-| To float         | int s21_from_decimal_to_float(s21_decimal src, float *dst) | int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) |
+| Convertor/parser |                          Function                          |
+|:----------------:|:----------------------------------------------------------:|
+| From int         | int s21_from_int_to_decimal(int src, s21_decimal *dst)     |
+| From float       | int s21_from_float_to_decimal(float src, s21_decimal *dst) |
+| To int           | int s21_from_decimal_to_int(s21_decimal src, int *dst)     |
+| To float         | int s21_from_decimal_to_float(s21_decimal src, float *dst) |
 
 Return value - code error:
 
@@ -79,13 +79,13 @@ Return value - code error:
 
 Note on the conversion of a float type number:
 
-    If the numbers are too small (0 < |x| < 1e-28), return an error and value equal to 0
-    If the numbers are too large (|x| > 79,228,162,514,264,337,593,543,950,335) or are equal to infinity, return an error
-    When processing a number with the float type, convert all the significant decimal digits contained in it. If there are more than 7 such digits, the number is rounded to the closest one that does not have more than 7 significant decimal digits.
+If the numbers are too small (0 < |x| < 1e-28), return an error and value equal to 0.
+If the numbers are too large (|x| > 79,228,162,514,264,337,593,543,950,335) or are equal to infinity, return an error.
+When processing a number with the float type, convert all the significant decimal digits contained in it. If there are more than 7 such digits, the number is rounded to the closest one that does not have more than 7 significant decimal digits.
 
 Note on the conversion from decimal type to int:
 
-    If there is a fractional part in a decimal number, it should be discarded (for example, 0.9 is converted to 0)
+If there is a fractional part in a decimal number, it should be discarded (for example, 0.9 is converted to 0).
 
 # Another functions:
 |                                                      Description                                                      |                         Function                         |
