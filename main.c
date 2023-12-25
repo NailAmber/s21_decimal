@@ -62,10 +62,11 @@ int main(void) {
   a.bits[0] = dec.bits[0] & MAX4BITE;
   printf("a 0 = %d\n", a.bits[0]); */
 
-  s21_decimal a, b;
-  a.bits[0] = 950335;
-  a.bits[1] = 0x00000000;
-  a.bits[2] = 0x00000000;
+  s21_decimal a;
+  s21_decimal b;
+  a.bits[0] = 0xffffffff;
+  a.bits[1] = 0xffffffff;
+  a.bits[2] = 0x0fffffff;
   a.bits[3] = 0x00000000;
 
   b.bits[0] = 6;
@@ -73,16 +74,16 @@ int main(void) {
   b.bits[2] = 0x00000000;
   b.bits[3] = 0x00010000;
 
-  s21_sub(a, b, &a);
+  printf("s21_add = %d\n\n", s21_add(a, b, &a));
 
-  printf("a.bits[0] = %d\n", a.bits[0]);
+  printf("a.bits[0] = %x\n", a.bits[0]);
   printf("a.bits[1] = %x\n", a.bits[1]);
   printf("a.bits[2] = %x\n", a.bits[2]);
   printf("a.bits[3] = %x\n\n", a.bits[3]);
 
-  int int_a;
-  s21_from_decimal_to_int(a, &int_a);
-  printf("int_a = %d\n", int_a);
+  //int int_a;
+  //s21_from_decimal_to_int(a, &int_a);
+  //printf("int_a = %d\n", int_a);
 
   /*
   int int_a = INT_MAX;
