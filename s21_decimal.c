@@ -514,7 +514,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {
   s21_decimal temp_dec = {{0, 0, 0, 0}};
   temp_dec.bits[3] = (src < 0) ? MINUS : 0;
-  temp_dec.bits[0] = src & ~MINUS;
+  temp_dec.bits[0] = (src < 0) ? (~src & ~MINUS) + 1 : src & ~MINUS;
   *dst = temp_dec;
   return 0;
 }
@@ -533,8 +533,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   }
   if (!res && !(dec_work.bits[0] & MINUS)) {
     *dst = dec_work.bits[0];
-    *dst |= (dec_work.bits[0] & MINUS) << 31;
-    *dst |= (src.bits[3] & MINUS);
+    *dst *= (src.bits[3] & MINUS) ? -1 : 1;
   } else {
     res = 1;
   }
