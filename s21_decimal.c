@@ -1,5 +1,6 @@
 #include "s21_decimal.h"
 
+#include <stdint.h>
 #include <stdio.h>
 
 int getoverflow(work_decimal *dec) {
@@ -62,6 +63,7 @@ int normalize(work_decimal *dec) {
   int error = 0;
   int last = 0;
   work_decimal temp_dec = *dec;
+
   for (int i = 6; i > 2; i--) {
     while (temp_dec.bits[i] != 0 && temp_dec.scale > 0) {
       last = pointright(&temp_dec);
@@ -73,6 +75,12 @@ int normalize(work_decimal *dec) {
       getoverflow(&temp_dec);
     }
   }
+
+  if (trash && temp_dec.bits[0] == 0xffffffff &&
+      temp_dec.bits[1] == 0xffffffff && temp_dec.bits[2] == 0xffffffff) {
+    error = 1;
+  }
+
   for (int i = 3; i < 7; i++) {
     if (temp_dec.bits[i] != 0 && temp_dec.scale == 0) {
       error = 1;
@@ -268,6 +276,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int second_minus = (value_2.bits[3] & MINUS);
     value_1.bits[3] &= ~MINUS;
     value_2.bits[3] &= ~MINUS;
+    // printf("\nvalue_1 = %d\n", value_1.bits[0]);
+    // printf("\nvalue_2 = %d\n", value_2.bits[0]);
     for (int i = 0; i < 3; i++) {
       if (s21_is_less(value_1, value_2)) {
         temp_result.bits[i] += dec2_work.bits[i] + (~dec1_work.bits[i] + 1);
@@ -566,8 +576,52 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-  if (src != src || (src == 1. / 0.) || (src == 1. / -0.)) return 1;
   s21_decimal temp_dec = {{0, 0, 0, 0}};
   *dst = temp_dec;
+
+  if (src != src || (src == 1. / 0.) || (src == 1. / -0.)) return 1;
+
+  if (src < 0) {
+    temp_dec.bits[3] |= MINUS;
+    src = -src;
+  }
+
+  *dst = temp_dec;
+
+  union {
+    float f;
+    uint32_t u;
+  } fu = {.f = src};
+
+  int exp = ((fu.u & ~MINUS) >> 23) - 127;
+  if (exp > 95 || exp < -94) return 1;
+
+  int scale = 0;
+  // printf("exp = %d\n", exp);
+  for (; !((int)src); src *= 10, scale++)
+    ;
+  for (; src < 10000000; src *= 10, scale++)
+    ;
+
+  fu.f = src;
+  exp = ((fu.u & ~MINUS) >> 23) - 127;
+  // printf("src now = %x\n", fu.u);
+  // printf("exp = %d\n", exp);
+  if (exp < -94 || scale > 28) return 1;
+  uint32_t mask = 0x400000;
+  if (exp < 0) exp = -exp;
+  temp_dec.bits[exp / 32] |= 1 << exp % 32;  // может слишком далеко ставлю бит?
+  exp--;
+  for (; exp > 0; exp--, mask >>= 1) {
+    temp_dec.bits[exp / 32] |= (fu.u & mask) ? 1 << exp % 32 : 0;
+  }
+  temp_dec.bits[3] |= scale << 16;
+  *dst = temp_dec;
+
+  // printf("scale = %d\n", scale);
+  // printf("bit[0] = %d\n", temp_dec.bits[0]);
+  // printf("bit[1] = %x\n", temp_dec.bits[1]);
+  // printf("bit[2] = %x\n", temp_dec.bits[2]);
+  // printf("bit[3] = %x\n\n", temp_dec.bits[3]);
   return 0;
 }
