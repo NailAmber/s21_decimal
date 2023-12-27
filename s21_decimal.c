@@ -522,7 +522,11 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   int res = 0;
   work_decimal dec_work = decimal_to_work(src);
-  for (int i = 0; i < ((src.bits[3] & SC) >> 16); i++) {
+  // printf("scale = %d\n", dec_work.scale);
+  int scale =
+      (((src.bits[3] & SC) >> 16) > 28) ? 28 : ((src.bits[3] & SC) >> 16);
+  // printf("scale = %d\n", scale);
+  for (int i = 0; i < scale; i++) {
     pointright(&dec_work);
   }
   for (int i = 6; i > 0; i--) {
@@ -531,11 +535,9 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
       i = 0;
     }
   }
-  if (!res && !(dec_work.bits[0] & MINUS)) {
+  if (!res) {
     *dst = dec_work.bits[0];
     *dst *= (src.bits[3] & MINUS) ? -1 : 1;
-  } else {
-    res = 1;
   }
   return res;
 }
@@ -544,7 +546,8 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   double temp_result = 0;
   int offset = 0;
   for (int i = 0; i < 96; i++) {
-    if ((src.bits[i / 32] & (1 << i % 32)) != 0) {
+    if ((src.bits[i / 32] & (1l << i % 32))) {  // добавил буковку l к 1
+
       double temp_pow = 1;
       for (int j = 0; j < i; j++) {
         temp_pow *= 2;
@@ -558,7 +561,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     }
   }
   *dst = (float)temp_result;
-  *dst *= src.bits[3] >> 31 ? -1 : 1;
+  *dst *= (src.bits[3] & MINUS) ? -1 : 1;
   return 0;
 }
 
