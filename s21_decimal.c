@@ -41,7 +41,7 @@ int pointright(work_decimal *dec) {
   dec->scale--;
   return remainder;
 }
-
+/*
 int bankround(double x) {
   double under = x - (int)x;
   int result = 0;
@@ -56,7 +56,7 @@ int bankround(double x) {
     result = (int)x + 1;
   }
   return result;
-}
+}*/
 
 int normalize(work_decimal *dec, const int summ) {
   int trash = 0;
@@ -148,7 +148,10 @@ int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   int res = 1;
   if ((dec1.bits[3] & MINUS) != (dec2.bits[3] & MINUS) &&
       ((dec1.bits[0] == dec2.bits[0]) && (dec1.bits[1] == dec2.bits[1]) &&
-       (dec1.bits[2] == dec2.bits[2]) && (dec1.bits[0] == 0))) {
+       (dec1.bits[2] == dec2.bits[2]) && (dec1.bits[0] == 0) &&
+       (dec1.bits[1] == 0) && (dec1.bits[2] == 0))) {
+    res = 1;
+  } else if ((dec1.bits[3] & MINUS) != (dec2.bits[3] & MINUS)) {
     res = 0;
   } else {
     work_decimal dec1_work, dec2_work;
@@ -239,6 +242,7 @@ int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
   return res;
 }
 
+/*
 int work_add(work_decimal dec1_work, work_decimal dec2_work,
              work_decimal *temp_result) {
   int res = 0;
@@ -248,7 +252,7 @@ int work_add(work_decimal dec1_work, work_decimal dec2_work,
     getoverflow(temp_result);
   }
   return res;
-}
+}*/
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int res = 0;
@@ -418,7 +422,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
   return res;*/
 }
-
+/*
 int work_mul(work_decimal dec1_work, work_decimal dec2_work,
              work_decimal *temp_dec) {
   int res = 0;
@@ -433,7 +437,7 @@ int work_mul(work_decimal dec1_work, work_decimal dec2_work,
   temp_dec->bits[4] = dec1_work.bits[2] * dec2_work.bits[2];
   getoverflow(temp_dec);
   return res;
-}
+}*/
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int res = 0;
@@ -561,7 +565,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       div_down_loop(&temp_dec, &dec2_work, &dec1_work, &dec3_work, &scale,
                     &temp_div, &is_it_first_loop);
     }
-    if (normalize(&dec3_work, 1)) {
+    if (normalize(&dec3_work, 1)) {  // Это вообще нужно? (может быть)
       if (!sign) {
         res = 1;
       } else {

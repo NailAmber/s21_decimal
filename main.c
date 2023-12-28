@@ -5,22 +5,23 @@
 #include "s21_decimal.h"
 
 int main(void) {
-  s21_decimal a, b;
+  float num1 = 1.39;
+  float num2 = -1.39;
+  s21_decimal dec1, dec2;
+  s21_from_float_to_decimal(num1, &dec1);
+  s21_from_float_to_decimal(num2, &dec2);
+  int res = s21_is_equal(dec1, dec2);
 
-  a.bits[0] = 100;
-  a.bits[1] = 0x0;
-  a.bits[2] = 0x0;
-  a.bits[3] = 0x00000000;
+  printf("res = %d\n", res);
 
-  b.bits[0] = 200;
-  b.bits[1] = 0x0;
-  b.bits[2] = 0x0;
-  b.bits[3] = 0x80000000;
-  printf("s21_add = %d\n", s21_sub(a, b, &a));
+  printf("dec1.bits[0] = %d\n", dec1.bits[0]);
+  printf("dec1.bits[1] = %x\n", dec1.bits[1]);
+  printf("dec1.bits[2] = %x\n", dec1.bits[2]);
+  printf("dec1.bits[3] = %x\n\n", dec1.bits[3]);
 
-  printf("a.bits[0] = %d\n", a.bits[0]);
-  printf("a.bits[1] = %x\n", a.bits[1]);
-  printf("a.bits[2] = %x\n", a.bits[2]);
-  printf("a.bits[3] = %x\n\n", a.bits[3]);
+  printf("dec2.bits[0] = %d\n", dec2.bits[0]);
+  printf("dec2.bits[1] = %x\n", dec2.bits[1]);
+  printf("dec2.bits[2] = %x\n", dec2.bits[2]);
+  printf("dec2.bits[3] = %x\n\n", dec2.bits[3]);
   return 0;
 }
