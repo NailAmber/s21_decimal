@@ -24,7 +24,7 @@ int getoverflow(work_decimal *dec);
 int pointleft(work_decimal *dec);
 int pointright(work_decimal *dec);
 int bankround(double x);
-int normalize(work_decimal *dec);
+int normalize(work_decimal *dec, const int summ);
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
