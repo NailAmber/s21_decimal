@@ -11,10 +11,10 @@ bits[0], bits[1], and bits[2] contain the low, middle, and high 32 bits of the 9
 
 bits[3] contains the scale factor and sign, and consists of following parts:
 
-    Bits 0 to 15, the lower word, are unused and must be zero.
-    Bits 16 to 23 must contain an exponent between 0 and 28, which indicates the power of 10 to divide the integer number.
-    Bits 24 to 30 are unused and must be zero.
-    Bit 31 contains the sign; 0 meaning positive, and 1 meaning negative.
+* Bits 0 to 15, the lower word, are unused and must be zero.
+* Bits 16 to 23 must contain an exponent between 0 and 28, which indicates the power of 10 to divide the integer number.
+* Bits 24 to 30 are unused and must be zero.
+* Bit 31 contains the sign; 0 meaning positive, and 1 meaning negative.
 
 Note that the bit representation differentiates between negative and positive zero. These values can be treated as being equal in all operations.
 
@@ -37,10 +37,10 @@ typedef struct
 
 The functions return the error code:
 
-    0 - OK
-    1 - the number is too large or equal to infinity
-    2 - the number is too small or equal to negative infinity
-    3 - division by 0
+* 0 - OK
+* 1 - the number is too large or equal to infinity
+* 2 - the number is too small or equal to negative infinity
+* 3 - division by 0
 
 Note on the numbers that do not fit into the mantissa:
 
@@ -59,8 +59,8 @@ When getting numbers that do not fit into the mantissa during arithmetic operati
 
 Return value:
 
-    0 - FALSE
-    1 - TRUE
+* 0 - FALSE
+* 1 - TRUE
 
 
 # Convertors and parsers:
@@ -74,8 +74,8 @@ Return value:
 
 Return value - code error:
 
-    0 - OK
-    1 - convertation error
+* 0 - OK
+* 1 - convertation error
 
 Note on the conversion of a float type number:
 
@@ -97,9 +97,27 @@ If there is a fractional part in a decimal number, it should be discarded (for e
 
 Return value - code error:
 
-    0 - OK
-    1 - calculation error
+* 0 - OK
+* 1 - calculation error
 
+# Building
+
+for make the static library:
+```sh
+make s21_decimal.a
+```
+
+for test reporting:
+```sh
+make gcov_report
+```
+
+then -> in dir coverage -> index.html -> open in browser
+
+for cleaning dir from compiling:
+```sh
+make clean
+```
 
 # Standarts
 Developed in C language of C11 standard using gcc compiler.
