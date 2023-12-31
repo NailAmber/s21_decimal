@@ -1,11 +1,8 @@
-#include "s21_decimal_test.h"
-
-#include <assert.h>
-#include <check.h>
-#include <limits.h>
-#include <stdio.h>
-
 #include "s21_decimal.h"
+
+#include <limits.h>
+
+#include "s21_decimal_test.h"
 
 START_TEST(test_add) {
   {
@@ -1367,6 +1364,30 @@ START_TEST(test_add) {
     ck_assert_int_eq(original_res.bits[2], s21_res.bits[2]);
     ck_assert_int_eq(original_res.bits[3], s21_res.bits[3]);
   }
+
+  {
+    s21_decimal src1 = {0};
+    src1.bits[0] = 0x00000000;
+    src1.bits[1] = 0x0000000f;
+    src1.bits[2] = 0x00000000;
+    src1.bits[3] = 0x00000000;
+    s21_decimal src2 = {0};
+    src2.bits[0] = 0x00000001;
+    src2.bits[1] = 0x00000000;
+    src2.bits[2] = 0x00000000;
+    src2.bits[3] = 0x80000000;
+    s21_decimal original_res = {0};
+    original_res.bits[0] = 0xffffffff;
+    original_res.bits[1] = 0x0000000e;
+    original_res.bits[2] = 0x00000000;
+    original_res.bits[3] = 0x00000000;
+    s21_decimal s21_res = {0};
+    ck_assert_int_eq(s21_add(src1, src2, &s21_res), 0);
+    ck_assert_int_eq(original_res.bits[0], s21_res.bits[0]);
+    ck_assert_int_eq(original_res.bits[1], s21_res.bits[1]);
+    ck_assert_int_eq(original_res.bits[2], s21_res.bits[2]);
+    ck_assert_int_eq(original_res.bits[3], s21_res.bits[3]);
+  }
 }
 END_TEST
 
@@ -2002,6 +2023,19 @@ START_TEST(test_div) {
     s21_decimal res1;
     int res = s21_div(dec1, dec2, &res1);
     ck_assert_int_eq(res, 2);
+  }
+  {
+    s21_decimal dec1 = {{0xffffffff, 0xffffffff, 0xffffffff, 0}};
+    s21_decimal dec2 = {{0x1, 0, 0, 0x80000000}};
+    s21_decimal res_dec = {{0xffffffff, 0xffffffff, 0xffffffff, 0x80000000}};
+
+    s21_decimal res1;
+    int res = s21_div(dec1, dec2, &res1);
+    ck_assert_int_eq(res, 0);
+    ck_assert_int_eq(res_dec.bits[0], res1.bits[0]);
+    ck_assert_int_eq(res_dec.bits[1], res1.bits[1]);
+    ck_assert_int_eq(res_dec.bits[2], res1.bits[2]);
+    ck_assert_int_eq(res_dec.bits[3], res1.bits[3]);
   }
 }
 END_TEST
@@ -4389,7 +4423,7 @@ Suite* suite_s21_decimal(void) {
 int main(void) {
   Suite* s = suite_s21_decimal();
   SRunner* runner = srunner_create(s);
-  
+
   srunner_set_fork_status(runner, CK_NOFORK);
   srunner_run_all(runner, CK_NORMAL);
   int no_failed = srunner_ntests_failed(runner);

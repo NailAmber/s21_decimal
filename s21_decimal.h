@@ -3,17 +3,18 @@
 
 #include <stdint.h>
 
-#define MINUS 0x80000000  // minus 10000000 00000000 00000000 00000000
-#define SC 0x00ff0000     // scale 00000000 11111111 00000000 00000000
-#define MAX4BITE 0xffffffff
+#define MINUS 0x80000000     // minus 10000000 00000000 00000000 00000000
+#define SC 0x00ff0000        // scale 00000000 11111111 00000000 00000000
+#define MAX4BITE 0xffffffff  // max4b 11111111 11111111 11111111 11111111
 
 typedef struct {
   int bits[4];
 } s21_decimal;
 
+// Расширенный decimal для того чтобы было удобно выполнять все операции
 typedef struct {
-  uint64_t bits[7];
-  uint16_t scale;
+  uint64_t bits[7];  // используем в два раза больший int на 64 бита
+  uint16_t scale;  // для скейла используем маленький int
 } work_decimal;
 
 // Work convertors
@@ -66,7 +67,6 @@ void point_to_normal(work_decimal *dec1_work, work_decimal *dec2_work);
 int getoverflow(work_decimal *dec);
 int pointleft(work_decimal *dec);
 int pointright(work_decimal *dec);
-// int bankround(double x);
 int normalize(work_decimal *dec, const int summ, const int sign);
 
 #endif  // S21_DECIMAL_H_
