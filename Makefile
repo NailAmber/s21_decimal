@@ -15,7 +15,7 @@ test: clean s21_decimal.a
 	./test
 
 s21_decimal.a:
-	gcc $(CFLAGS) $(POSIX) s21_decimal.c -c -O $(COVER)
+	gcc $(CFLAGS) $(POSIX) s21_decimal.c -c $(COVER)
 	ar rcs s21_decimal.a s21_decimal.o
 
 gcov_report: clean test
