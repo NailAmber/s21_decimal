@@ -1,24 +1,28 @@
-CFLAGS=-Wall -Werror -Wextra -std=gnu11
+CFLAGS=-Wall -Werror -Wextra -std=c11
 POSIX=-D_POSIX_C_SOURCE=200809L
 COVER=--coverage
-TESTS=s21_decimal_test.h s21_decimal_test.c
+TESTS=s21_decimal_test.c
 
 all: clean s21_decimal.a
-	gcc $(CFLAGS) $(POSIX) main.c s21_decimal.a -o main $(COVER)
+	gcc $(CFLAGS) $(POSIX) main.c s21_decimal.a -o main
 
 clean:
-	rm -rf *.a *.o main *gcno *.gcda test *gcov ./coverage *.info *gch
+	rm -rf *.a *.o main *gcno *.gcda test *gcov ./coverage *.info *gch *.html *.css
 
 test: clean s21_decimal.a
-	gcc $(COVER) $(CFLAGS) $(TESTS) s21_decimal.a -lcheck -o test
+	gcc $(CFLAGS) $(TESTS) -c
+	ar rc s21_decimal_test.a s21_decimal_test.o
+	ranlib s21_decimal_test.a
+	gcc $(CFLAGS) $(COVER) -o test s21_decimal.a s21_decimal_test.a s21_decimal.c -lcheck
 	chmod +x test
 	./test
 
 s21_decimal.a:
-	gcc $(CFLAGS) $(POSIX) s21_decimal.c -c $(COVER)
-	ar rcs s21_decimal.a s21_decimal.o
+	gcc $(CFLAGS) s21_decimal.c -c
+	ar rc s21_decimal.a s21_decimal.o
+	ranlib s21_decimal.a
 
 gcov_report: clean test
-	gcov *.gcno
-	lcov --directory . --capture --output-file coverage.info
-	genhtml coverage.info --output-directory coverage
+	gcov *.gcda
+	gcovr
+	gcovr --html-details -o report.html

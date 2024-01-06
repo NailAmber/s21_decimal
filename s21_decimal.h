@@ -6,6 +6,8 @@
 #define MINUS 0x80000000     // minus 10000000 00000000 00000000 00000000
 #define SC 0x00ff0000        // scale 00000000 11111111 00000000 00000000
 #define MAX4BITE 0xffffffff  // max4b 11111111 11111111 11111111 11111111
+#define FIRST 0xFFFF         // FIRST 00000000 00000000 11111111 11111111
+#define SECOND 0x7F000000         // FIRST 01111111 00000000 00000000 00000000
 
 typedef struct {
   int bits[4];
@@ -68,5 +70,10 @@ int getoverflow(work_decimal *dec);
 int pointleft(work_decimal *dec);
 int pointright(work_decimal *dec);
 int normalize(work_decimal *dec, const int summ, const int sign);
+
+int multiplication(s21_decimal value_1, s21_decimal value_2,
+                   s21_decimal *result);
+work_decimal binary_mul(s21_decimal value_1, s21_decimal value_2);
+s21_decimal s21_round_banking(s21_decimal integral, s21_decimal fractional);
 
 #endif  // S21_DECIMAL_H_

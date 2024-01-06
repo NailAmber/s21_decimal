@@ -1,4 +1,5 @@
 #include "s21_decimal.h"
+#include <stdio.h>
 
 // Суть этой функции в том что она перекидывает лишние
 // биты в более старший int. Используется повсеместно
@@ -392,8 +393,139 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   return s21_add(value_1, value_2, result);
 }
 
+work_decimal binary_mul(s21_decimal value_1, s21_decimal value_2) {
+  work_decimal result = {{0, 0, 0, 0, 0, 0}, 0};
+  work_decimal temp = decimal_to_work(value_1);
+
+  int max_bit = -1;
+
+  for (int i = 128 - 1; i >= 0; i--) {
+    if ((!!(value_2.bits[i / 32] & (1U << i % 32)))) {
+      max_bit = i;
+      break;
+    }
+  }
+
+  for (int i = 0; i <= max_bit; i++) {
+    if (!!(value_2.bits[i / 32] & (1U << i % 32)) != 0) {
+      work_decimal tmp2 = temp;
+
+      while (!(tmp2.bits[0] == 0 && tmp2.bits[1] == 0 && tmp2.bits[2] == 0 &&
+               tmp2.bits[3] == 0 && tmp2.bits[4] == 0 && tmp2.bits[5] == 0 &&
+               tmp2.bits[6] == 0)) {
+        work_decimal overflow_bits;
+
+        work_decimal result2 = {{0, 0, 0, 0, 0, 0}, 0};
+        result2.bits[0] = result.bits[0] & tmp2.bits[0];
+        result2.bits[1] = result.bits[1] & tmp2.bits[1];
+        result2.bits[2] = result.bits[2] & tmp2.bits[2];
+        result2.bits[3] = result.bits[3] & tmp2.bits[3];
+
+        result2.bits[4] = result.bits[4] & tmp2.bits[4];
+        result2.bits[5] = result.bits[5] & tmp2.bits[5];
+        result2.bits[6] = result.bits[6] & tmp2.bits[6];
+
+        overflow_bits = result2;
+
+        bit_left(&overflow_bits, 1);
+
+        result.bits[0] = result.bits[0] ^ tmp2.bits[0];
+        result.bits[1] = result.bits[1] ^ tmp2.bits[1];
+        result.bits[2] = result.bits[2] ^ tmp2.bits[2];
+        result.bits[3] = result.bits[3] ^ tmp2.bits[3];
+
+        result.bits[4] = result.bits[4] ^ tmp2.bits[4];
+        result.bits[5] = result.bits[5] ^ tmp2.bits[5];
+        result.bits[6] = result.bits[6] ^ tmp2.bits[6];
+
+        tmp2 = overflow_bits;
+      }
+    }
+    bit_left(&temp, 1);
+  }
+  return result;
+}
+
+int multiplication(s21_decimal value_1, s21_decimal value_2,
+                   s21_decimal *result) {
+  int error = 0;
+  error = value_1.bits[0] + value_2.bits[0];
+  *result = value_1;
+ /* int scale1 = (value_1.bits[3] & SC) >> 16;
+  int scale2 = (value_2.bits[3] & SC) >> 16;
+
+  value_1.bits[3] = 0;
+  value_2.bits[3] = 0;
+
+  work_decimal dec_work = binary_mul(value_1, value_2);
+
+  int shift = 0;
+
+  if (!(dec_work.bits[0] == 0 && dec_work.bits[1] == 0 &&
+        dec_work.bits[2] == 0 && dec_work.bits[3] == 0 &&
+        dec_work.bits[4] == 0 && dec_work.bits[5] == 0 &&
+        dec_work.bits[6] == 0)) {
+    work_decimal maxi = {{0xffffffff, 0xffffffff, 0xffffffff, 0, 0, 0, 0}, 0};
+    
+        s21_int256 quotient = s21_int256_binary_division(value, max, NULL);
+
+            // Перебираем все степени 10, чтобы найти ближайшую большую степень,
+       чем quotient
+            // Делаем так, потому что это гораздо быстрее, чем делить на 10 в
+       цикле while (1) { int compare =
+       s21_int128_binary_compare(quotient.decimals[0],
+       s21_int128_get_ten_pow(shift)); if (compare == -1 || compare == 0) {
+                    break;
+                }
+                ++shift;
+            }
+
+            // Проверяем, что value впишется в 96 бит, если поделить на 10 в
+       найденной степени work_decimal tmp = s21_int256_binary_division( value,
+       s21_create_int256_from_decimal(s21_int128_get_ten_pow(shift)), NULL);
+            // Если не помещается, то берем следующую степень
+            if (!s21_int128_binary_equal_zero(tmp.decimals[1]) ||
+       tmp.decimals[0].bits[3] != 0) {
+                ++shift;
+            }
+    
+  }
+*/
+  return error;
+}
+
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-  int res = 0;
+  int error = 0;
+
+  if (!result) {
+    error = 4;
+  } else {
+    s21_decimal temp_dec = {{0, 0, 0, 0}};
+
+    error = multiplication(value_1, value_2, &temp_dec);
+
+    if ((value_1.bits[3] & MINUS) != (value_2.bits[3] & MINUS)) {
+      s21_negate(temp_dec, &temp_dec);
+    }
+
+    if (error == 1) {
+      if (temp_dec.bits[3] & MINUS) {
+        error = 2;
+      }
+    }
+
+    if (error == 0 && s21_is_not_equal(value_1, (s21_decimal){{0, 0, 0, 0}}) &&
+        s21_is_not_equal(value_2, (s21_decimal){{0, 0, 0, 0}}) &&
+        s21_is_equal(temp_dec, (s21_decimal){{0, 0, 0, 0}})) {
+      error = 2;
+    }
+
+    *result = temp_dec;
+  }
+
+  return error;
+
+  /*int res = 0;
   work_decimal dec1_work = decimal_to_work(value_1),
                dec2_work = decimal_to_work(value_2);
   work_decimal temp_dec = {{0, 0, 0, 0, 0, 0, 0}, 0};
@@ -437,7 +569,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     result->bits[3] |=
         (value_1.bits[3] & SC) + (value_2.bits[3] & SC);  // суммируем скейлы
   }
-  return res;
+  return res;*/
 }
 
 // сдвиг битов влево на shift единиц
@@ -779,31 +911,69 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
   return 0;
 }
 
+
+s21_decimal s21_round_banking(s21_decimal integral, s21_decimal fractional) {
+    s21_decimal zerofive = {{5,0,0,0x00010000}};
+    s21_decimal result;
+
+    if (s21_is_equal(fractional, zerofive)) {
+        // Если дробная часть ровно 0.5
+        if ((integral.bits[0] & 1) != 1) {
+            // Если целая часть четная, то оставляем её
+            result = integral;
+        } else {
+            // Если целая часть нечетная, то увеличиваем её на 1
+            s21_add(integral, (s21_decimal){{1,0,0,0}}, &result);
+        }
+    } else if (s21_is_greater(fractional, zerofive)) {
+        // Если дробная часть > 0.5, то увеличиваем целую часть на 1
+         s21_add(integral, (s21_decimal){{1,0,0,0}}, &result);
+    } else {
+        // Если дробная часть < 0.5, то оставляем целую часть без изменений
+        result = integral;
+    }
+
+    return result;
+}
+
 // для округления используем банковского округление,
 // то есть округление в сторону чётных
 int s21_round(s21_decimal value, s21_decimal *result) {
-  work_decimal dec_work = decimal_to_work(value);
-  int trash = 0;
-  int last = 0;
-  for (int i = 6; i >= 0; i--) {
-    // убираем всю вещественную часть, но
-    // запоминаем последнюю цифру и общий остаток
-    while (dec_work.bits[i] != 0 && dec_work.scale > 0) {
-      last = pointright(&dec_work);
-      trash += last;
+
+ int error = 0;
+  int scale = (value.bits[3] & SC) >> 16;
+    if (!result) {
+        // Если указатель на decimal является NULL
+        error = 1;
+    } else if (scale > 28 || scale < 0 || (value.bits[3] & FIRST) || (value.bits[3] & SECOND)) {
+        // Проверяем, что value является корректными decimal
+        error = 1;
+        *result = (s21_decimal){{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF}};
+    } else {
+        // В остальных случаях округляем
+        *result = (s21_decimal){{0,0,0,0}};
+        int sign = value.bits[3] & MINUS;
+        s21_decimal fractional;
+        s21_decimal value_unsigned_truncated;
+        // Убираем знак
+
+        s21_decimal value_unsigned = value;
+        value_unsigned.bits[3] = value.bits[3] & ~MINUS;
+        // Убираем дробную часть числа
+        s21_truncate(value_unsigned, &value_unsigned_truncated);
+
+        // Считаем убранную дробную часть числа
+        s21_sub(value_unsigned, value_unsigned_truncated, &fractional);
+
+        // Производим округление, исходя из дробной части числа
+        value_unsigned_truncated = s21_round_banking(value_unsigned_truncated, fractional);
+
+        *result = value_unsigned_truncated;
+        // Возвращаем знак
+        result->bits[3] |= sign;
     }
-  }
 
-  // банковское округление
-  if (((last > 5 || last == 5) && trash > 5) ||
-      (last == 5 && trash == 5 && (dec_work.bits[0] % 10) % 2 == 1)) {
-    dec_work.bits[0]++;
-    getoverflow(&dec_work);
-  }
-
-  *result = work_to_decimal(dec_work);
-  result->bits[3] = value.bits[3] & MINUS;
-  return 0;
+    return error;
 }
 
 // просто делаем s21_floor но без знака. Знак потом
