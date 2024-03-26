@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Werror -Wextra -std=c11
+CFLAGS=-Wall -Werror -Wextra #-std=c11
 POSIX=-D_POSIX_C_SOURCE=200809L
 COVER=--coverage
 TESTS=s21_decimal_test.c
@@ -13,7 +13,7 @@ test: clean s21_decimal.a
 	gcc $(CFLAGS) $(TESTS) -c
 	ar rc s21_decimal_test.a s21_decimal_test.o
 	ranlib s21_decimal_test.a
-	gcc $(CFLAGS) $(COVER) -o test s21_decimal.a s21_decimal_test.a s21_decimal.c -lcheck
+	gcc $(CFLAGS) $(COVER) -o test s21_decimal.a s21_decimal_test.a s21_decimal.c -lcheck -lm -lsubunit
 	chmod +x test
 	./test
 

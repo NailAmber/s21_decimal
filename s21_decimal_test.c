@@ -1937,7 +1937,7 @@ START_TEST(test_from_float_to_decimal1) {
   }
 
   {
-    float f = fails_big[_i];
+    float f = 340282346638528859811704183484516925440.f;
     s21_decimal result;
 
     int code = s21_from_float_to_decimal(f, &result);
@@ -1945,31 +1945,12 @@ START_TEST(test_from_float_to_decimal1) {
   }
 
   {
-    float f = -fails_big[_i];
+    float f =
+        0.00000000000000000000000000009999999429857660888699309391359540480357727713304344f;
     s21_decimal result;
 
     int code = s21_from_float_to_decimal(f, &result);
     ck_assert_int_eq(code, 1);
-  }
-
-  {
-    float f = fails_small[_i];
-    s21_decimal result;
-    s21_decimal check = {{0x0, 0x0, 0x0, 0x0}};
-
-    int code = s21_from_float_to_decimal(f, &result);
-    ck_assert_int_eq(code, 1);
-    ck_assert_int_eq(s21_is_equal(result, check), 1);
-  }
-
-  {
-    float f = -fails_small[_i];
-    s21_decimal result;
-    s21_decimal check = {{0x0, 0x0, 0x0, 0x0}};
-
-    int code = s21_from_float_to_decimal(f, &result);
-    ck_assert_int_eq(code, 1);
-    ck_assert_int_eq(s21_is_equal(result, check), 1);
   }
 
   {

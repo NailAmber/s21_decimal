@@ -673,11 +673,11 @@ big_decimal big_decimal_binary_division(big_decimal decimal1,
     // Делимое для промежуточных расчетов, на первом этапе равно decimal1
     big_decimal dividend = decimal1;
 
-    // Флаг необходимости проводить вычитание (Шаг 5 алгоритма).
+    // Флаг необходимости проводить вычитание
     // На первой итерации всегда требуется вычитать
     int need_subtraction = 1;
 
-    // Повторяем действия k+1 раз (один раз пп.2-3 алгоритма и k раз пп.4-6)
+    // Повторяем действия k+1 раз
     while (shift >= 0) {
       // Определяем необходимое действие (Прибавлять или вычитать Сдвинутый
       // делитель)
@@ -709,12 +709,12 @@ big_decimal big_decimal_binary_division(big_decimal decimal1,
       }
       --shift;
     }
-    // Определяем, требуется ли коррекция остатка (п.8 алгоритма)
+    // Определяем, требуется ли коррекция остатка
     if (s21_decimal_is_set_bit(partial_remainder.decimals[1], 128 - 1)) {
       partial_remainder =
           big_decimal_binary_addition(partial_remainder, shifted_divisor);
     }
-    // Возвращаем на место частичный остаток (п.9 алгоритма)
+    // Возвращаем на место частичный остаток
     partial_remainder =
         big_decimal_binary_shift_right(partial_remainder, left1 - left2);
   }
@@ -736,7 +736,7 @@ int big_decimal_get_shift_to_decimal(big_decimal value) {
         s21_int128_binary_equal_zero(value.decimals[1]))) {
     // Максимальное 96битное число
     big_decimal max =
-        decimal_to_big((s21_decimal){{0xffffffff, 0xffffffff, 0xffffffff}});
+        decimal_to_big((s21_decimal){{0xffffffff, 0xffffffff, 0xffffffff, 0}});
     // Находим число, во сколько раз value больше максимального 96битного числа
     big_decimal quotient = big_decimal_binary_division(value, max, NULL);
 
@@ -784,14 +784,15 @@ int s21_is_correct_decimal(s21_decimal decimal) {
 int multiplication(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result) {
   int error = 0;
-  int scale1 = (value_1.bits[3] & SC) >> 16;
+  int scale1 = (value_1.bits[3] & SC) >> 16;  // Вычисляем степени
   int scale2 = (value_2.bits[3] & SC) >> 16;
 
-  value_1.bits[3] = 0;
+  value_1.bits[3] = 0;  // Зануляем всё кроме мантиссы
   value_2.bits[3] = 0;
-
+  // Перемножаем множители без степеней как два огромных целых числа
   big_decimal big_dec = binary_mul(value_1, value_2);
-
+  // Рассчитываем, на сколько необходимо поделить результат, чтобы вписать его в
+  // 96бит числа decimal
   int shift = big_decimal_get_shift_to_decimal(big_dec);
 
   int res_scale = scale1 + scale2 - shift;
@@ -889,8 +890,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
   return error;
 }
-
-// сдвиг битов влево на shift единиц
 
 void s21_decimal_leveling(s21_decimal value_1, s21_decimal value_2,
                           big_decimal *value_1l, big_decimal *value_2l) {
