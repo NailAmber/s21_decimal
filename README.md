@@ -119,6 +119,6 @@ for cleaning dir from compiling:
 make clean
 ```
 
-# Standarts
+# Standards
 Developed in C language of C11 standard using gcc compiler.
 Used the POSIX.1-2017 standard.
